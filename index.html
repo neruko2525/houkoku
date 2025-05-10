@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>卓報告ツール</title>
+  <style>
+    body {
+      font-family: "Arial", sans-serif;
+      background-color: #f0f2f5;
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 10px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0 15px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .optional-section {
+      background-color: #e9f5ff;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      border: 1px solid #cde;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+      display: block;
+    }
+
+    #copy-button {
+      background-color: #007bff;
+      margin-top: 10px;
+    }
+
+    pre {
+  background-color: #fff;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  white-space: pre-wrap;
+  margin-top: 20px;
+}
+
+body::after {
+  content: "";
+  display: block;
+  height: 100px;
+}
+
+  </style>
+</head>
+<body>
+  <h1>卓報告ツール</h1>
+
+  <label for="scenario">シナリオ名</label>
+  <input type="text" id="scenario">
+
+  <label for="kp">KP</label>
+  <input type="text" id="kp">
+
+  <label>
+    <input type="checkbox" id="toggle-kpc" onchange="toggleSection('kpc-section')"> KPC を追加
+  </label>
+  <div class="optional-section hidden" id="kpc-section">
+    <label for="kpc">KPC</label>
+    <input type="text" id="kpc">
+  </div>
+
+  <label for="ho1">HO1</label>
+  <input type="text" id="ho1">
+  <label for="pc1">PC1</label>
+  <input type="text" id="pc1">
+  <label for="pl1">PL1</label>
+  <input type="text" id="pl1">
+
+  <label>
+    <input type="checkbox" id="toggle-ho2" onchange="toggleSection('ho2-section')"> HO2 を追加
+  </label>
+  <div class="optional-section hidden" id="ho2-section">
+    <label for="ho2">HO2</label>
+    <input type="text" id="ho2">
+    <label for="pc2">PC2</label>
+    <input type="text" id="pc2">
+    <label for="pl2">PL2</label>
+    <input type="text" id="pl2">
+  </div>
+
+  <label>
+    <input type="checkbox" id="toggle-ho3" onchange="toggleSection('ho3-section')"> HO3 を追加
+  </label>
+  <div class="optional-section hidden" id="ho3-section">
+    <label for="ho3">HO3</label>
+    <input type="text" id="ho3">
+    <label for="pc3">PC3</label>
+    <input type="text" id="pc3">
+    <label for="pl3">PL3</label>
+    <input type="text" id="pl3">
+  </div>
+
+  <label>
+    <input type="checkbox" id="toggle-ho4" onchange="toggleSection('ho4-section')"> HO4 を追加
+  </label>
+  <div class="optional-section hidden" id="ho4-section">
+    <label for="ho4">HO4</label>
+    <input type="text" id="ho4">
+    <label for="pc4">PC4</label>
+    <input type="text" id="pc4">
+    <label for="pl4">PL4</label>
+    <input type="text" id="pl4">
+  </div>
+
+  <label for="end">END</label>
+  <input type="text" id="end">
+
+  <button onclick="generate()">生成する</button>
+
+  <h2>出力結果</h2>
+  <pre id="output"></pre>
+  <button id="copy-button" onclick="copyToClipboard()">コピー</button>
+
+  <script>
+    function toggleSection(id) {
+      const section = document.getElementById(id);
+      section.classList.toggle("hidden");
+    }
+
+    function generate() {
+      const getVal = id => document.getElementById(id)?.value || "";
+
+      const kpcChecked = document.getElementById("toggle-kpc").checked;
+      const kpcVal = getVal("kpc");
+      const kpVal = getVal("kp");
+
+      let template = `
+┆ {シナリオ} ┆
+
+﹏﹏﹏﹏﹏﹏﹏﹏﹏
+
+▸KP(敬称略)
+${kpcChecked && kpcVal ? `${kpcVal} / ` : ""}{KP}
+
+▸PC / PL
+${getVal("ho1") ? `{HO1} - {PC1} / {PL1}` : `{PC1} / {PL1}`}
+`;
+
+      if (document.getElementById("toggle-ho2").checked) {
+        template += `${getVal("ho2") ? `{HO2} - {PC2} / {PL2}` : `{PC2} / {PL2}`}\n`;
+      }
+      if (document.getElementById("toggle-ho3").checked) {
+        template += `${getVal("ho3") ? `{HO3} - {PC3} / {PL3}` : `{PC3} / {PL3}`}\n`;
+      }
+      if (document.getElementById("toggle-ho4").checked) {
+        template += `${getVal("ho4") ? `{HO4} - {PC4} / {PL4}` : `{PC4} / {PL4}`}\n`;
+      }
+
+      template += `
+﹏﹏﹏﹏﹏﹏﹏﹏﹏
+
+ˋ {END} ˊ
+`;
+
+      const replacements = {
+        "{シナリオ}": getVal("scenario"),
+        "{KPC}": kpcVal,
+        "{KP}": kpVal,
+        "{HO1}": getVal("ho1"),
+        "{PC1}": getVal("pc1"),
+        "{PL1}": getVal("pl1"),
+        "{HO2}": getVal("ho2"),
+        "{PC2}": getVal("pc2"),
+        "{PL2}": getVal("pl2"),
+        "{HO3}": getVal("ho3"),
+        "{PC3}": getVal("pc3"),
+        "{PL3}": getVal("pl3"),
+        "{HO4}": getVal("ho4"),
+        "{PC4}": getVal("pc4"),
+        "{PL4}": getVal("pl4"),
+        "{END}": getVal("end")
+      };
+
+      for (const key in replacements) {
+        const regex = new RegExp(key, "g");
+        template = template.replace(regex, replacements[key]);
+      }
+
+      document.getElementById("output").textContent = template.trim();
+    }
+
+    function copyToClipboard() {
+      const outputText = document.getElementById("output").textContent;
+      if (outputText) {
+        navigator.clipboard.writeText(outputText).then(() => {
+          alert("コピーしました!");
+        }).catch(err => {
+          alert("コピーに失敗しました: " + err);
+        });
+      }
+    }
+  </script>
+</body>
+</html>
